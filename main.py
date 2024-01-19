@@ -9,6 +9,7 @@ import subprocess
 import psutil
 import speech_recognition as sr
 import threading
+from screeninfo import get_monitors
 
 lefty_is_locked = False
 lock = threading.Lock()
@@ -17,12 +18,12 @@ lock = threading.Lock()
 recognizer = sr.Recognizer()
 
 # Get a list of monitors (usually there's just one)
-#monitors = get_monitors()
+monitors = get_monitors()
 
 # Get the width and height of the primary monitor
-#primary_monitor = monitors[0]
-#width, height = primary_monitor.width, primary_monitor.height
-width, height = 1600, 1300
+primary_monitor = monitors[0]
+width, height = primary_monitor.width + 50, primary_monitor.height + 50
+# width, height = 1600, 1300
 
 mouse = MouseController()  # Initialize the mouse controller
 
@@ -154,6 +155,7 @@ def close_keyboard():
         if process.info['name'] == 'osk.exe':
             process.terminate()
     keyboard_is_shown=False
+
 def main():
     global keyboard_is_shown
     global lefty_is_locked
@@ -183,7 +185,6 @@ def main():
                         close_keyboard()
                 if hand_side=="Left":
                     if fingers[0]==2 and fingers[1]==28: # if spiderman gesture is recognized
-                        #listen_to_speech_and_process()
                         t = threading.Thread(target=listen_to_speech_and_process)
                         threads.append(t)
                         t.start()
@@ -193,17 +194,17 @@ def main():
                 #connect all joints
                 for id, lm in enumerate(handLms.landmark):
                     mpDraw.draw_landmarks(image, handLms, mpHands.HAND_CONNECTIONS)
-                #h, w, c = image.shape
+                h, w, c = image.shape
                 # Print hand side
-                #cv2.putText(image, hand_side, (int(handLms.landmark[12].x * w - 70), int(handLms.landmark[12].y * h) - 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+                cv2.putText(image, hand_side, (int(handLms.landmark[12].x * w - 70), int(handLms.landmark[12].y * h) - 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
         # Update the display
-        # ctime=time.time()
-        # fps=1/(ctime-ptime)
-        # fps=int(fps)
-        # cv2.putText(image, f'fps {str(fps)}', (10,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
-        # cv2.imshow("Output", image)
-        # ptime=ctime
-        # cv2.waitKey(1)
+        ctime=time.time()
+        fps=1/(ctime-ptime)
+        fps=int(fps)
+        cv2.putText(image, f'fps {str(fps)}', (10,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
+        cv2.imshow("Output", image)
+        ptime=ctime
+        cv2.waitKey(1)
 
         if keyboard.is_pressed('q'):
             print("Exiting the program.")
