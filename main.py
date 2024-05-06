@@ -11,9 +11,9 @@ import speech_recognition as sr
 import threading
 from screeninfo import get_monitors
 
-lefty_is_locked = False
 lock = threading.Lock()
-
+lefty_is_locked = False
+keyboard_is_shown = False
 # Initialize the recognizer
 recognizer = sr.Recognizer()
 
@@ -22,7 +22,8 @@ monitors = get_monitors()
 
 # Get the width and height of the primary monitor
 primary_monitor = monitors[0]
-width, height = primary_monitor.width + 50, primary_monitor.height + 50
+width, height = primary_monitor.width , primary_monitor.height
+
 # width, height = 1600, 1300
 
 mouse = MouseController()  # Initialize the mouse controller
@@ -148,7 +149,7 @@ def open_keyboard():
     subprocess.Popen('osk.exe')
     keyboard_is_shown=True
 
-keyboard_is_shown = False
+
 def close_keyboard():
     global keyboard_is_shown
     for process in psutil.process_iter(attrs=['name']):
