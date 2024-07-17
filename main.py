@@ -22,7 +22,7 @@ monitors = get_monitors()
 
 # Get the width and height of the primary monitor
 primary_monitor = monitors[0]
-width, height = primary_monitor.width , primary_monitor.height
+width, height = primary_monitor.width, primary_monitor.height
 
 # width, height = 1600, 1300
 
@@ -36,7 +36,7 @@ hands = mpHands.Hands()
 mpDraw = mp.solutions.drawing_utils
 
 ###############
-smoothening = 2
+smoothening = 4
 prev_x, prev_y = 0,0
 ###############
 def listen_to_speech_and_process():
@@ -121,26 +121,42 @@ def is_pinky_and_point_fingers_up(fingers):
 
 
 last_click_time = 0  # Initialize the time of the last click
-def control_mouse(handLms,fingers):
+def control_mouse(handLms, fingers):
     global last_click_time
     global prev_y, prev_x
+
     curr_x, curr_y = int(handLms.landmark[8].x * width), int(handLms.landmark[8].y * height)
+
+    # Center of the screen
+    center_x, center_y = width // 2, height // 2
+
+    # Calculate the distance from the center and apply the gamma factor
+    if curr_x < center_x:
+        curr_x = curr_x - (abs(center_x - curr_x)/center_x)*curr_x*2
+    else:
+        curr_x = curr_x + (abs(center_x - curr_x) / center_x) * curr_x
+
+    if curr_y < center_y:
+        curr_y = curr_y - (abs(center_y - curr_y)/center_y)*curr_y
+    else:
+        curr_y = curr_y + (abs(center_y - curr_y)/center_y)*curr_y
 
     if is_point_finger_up(fingers):
         try:
-            cursor_x = prev_x + (curr_x - prev_x)/smoothening
+            cursor_x = prev_x + (curr_x - prev_x) / smoothening
             cursor_y = prev_y + (curr_y - prev_y) / smoothening
-            mouse.position = (cursor_x,cursor_y)
-            prev_x, prev_y=cursor_x, cursor_y
+            mouse.position = (cursor_x, cursor_y)
+            prev_x, prev_y = cursor_x, cursor_y
         except Exception as e:
             print(f'Error {e} occurred')
-    current_time=time.time()
-    if current_time - last_click_time >=1.0:
+
+    current_time = time.time()
+    if current_time - last_click_time >= 1.0:
         if is_pinky_and_point_fingers_up(fingers):
             mouse.click(Button.left, 2)
-            last_click_time=current_time
+            last_click_time = current_time
         elif fingers[2] == 1:
-            last_click_time=current_time
+            last_click_time = current_time
             mouse.press(Button.left)
             mouse.release(Button.left)
 
